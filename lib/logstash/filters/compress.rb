@@ -2,6 +2,9 @@
 require "logstash/filters/base"
 require "logstash/namespace"
 
+require "zlib"
+require "base64"
+
 # This  filter will replace the contents of the default 
 # message field with whatever you specify in the configuration.
 #
@@ -13,14 +16,13 @@ class LogStash::Filters::Compress < LogStash::Filters::Base
   #
   # filter {
   #    {
-  #     message => "My message..."
   #   }
   # }
   #
   config_name "compress"
   
-  # Replace the message with this value.
-  config :message, :validate => :string, :default => "Hello World!"
+  
+  config :message, :validate => :string
   
 
   public
@@ -34,7 +36,8 @@ class LogStash::Filters::Compress < LogStash::Filters::Base
     if @message
       # Replace the event message with our message as configured in the
       # config file.
-      event.set("message", @message)
+      # compress zlib and encode base64
+      event.set("message", Base64.encode64(Zlib::Deflate.deflate(@message)))
     end
 
     # filter_matched should go in the last line of our successful code
