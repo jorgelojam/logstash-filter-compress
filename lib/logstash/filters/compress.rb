@@ -15,15 +15,15 @@ class LogStash::Filters::Compress < LogStash::Filters::Base
   # configure this filter from your Logstash config.
   #
   # filter {
-  #    {
+  #   compress {
+  #     fields => ...
   #   }
   # }
   #
   config_name "compress"
-  
-  
-  config :message, :validate => :string
-  
+
+  # The fields to be compressed
+  config :fields, :validate => :array, :required => true  
 
   public
   def register
@@ -33,14 +33,19 @@ class LogStash::Filters::Compress < LogStash::Filters::Base
   public
   def filter(event)
 
-    if @message
-      # Replace the event message with our message as configured in the
-      # config file.
-      # compress zlib and encode base64
-      event.set("message", Base64.encode64(Zlib::Deflate.deflate(@message)))
+    @fields.each do |field|
+      next unless event.include?(field)
+      if event.get(field).is_a?(Array)
+        event.set(field, event.get(field).collect { |v| compress(v) })
+      else
+        event.set(field, compress(event.get(field)))
+      end
     end
-
-    # filter_matched should go in the last line of our successful code
-    filter_matched(event)
   end # def filter
+
+  private
+  def compress(data)
+    Base64.encode64(Zlib::Deflate.deflate(data)
+  end
+
 end # class LogStash::Filters::Compress
