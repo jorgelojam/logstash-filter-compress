@@ -43,6 +43,11 @@ bundle install
 bundle exec rspec
 ```
 
+- Run docker logstash development container
+```sh
+docker run --rm -v "$PWD":/usr/src/app -w /usr/src/app logstash-dev:5.3.3 bundle install
+```
+
 ### 2. Running your unpublished Plugin in Logstash
 
 #### 2.1 Run in a local Logstash clone
@@ -69,6 +74,12 @@ You can use the same **2.1** method to run your plugin in an installed Logstash 
 ```sh
 gem build logstash-filter-awesome.gemspec
 ```
+
+- Build with logstash development container
+```sh
+docker run --rm -v "$PWD":/usr/src/app -w /usr/src/app logstash-dev:5.3.3 gem build logstash-filter-compress.gemspec
+```
+
 - Install the plugin from the Logstash home
 ```sh
 bin/logstash-plugin install /your/local/plugin/logstash-filter-awesome.gem
